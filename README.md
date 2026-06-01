@@ -85,19 +85,19 @@ Regenerate, or point at another file, with `python try_part3.py`.
 
 ## Project structure
 
-geojit-report-generator/
-├── app.py                  # Streamlit UI
-├── try_part3.py            # build an example report from a file
+geojit-report-generator
+├── app.py                  
+├── try_part3.py           
 ├── requirements.txt
 ├── .env.example
 ├── src/
-│   ├── ingest.py           # PDF / CSV / TXT -> text
-│   ├── extract.py          # Gemini extraction; the JSON schema lives here
-│   ├── charts.py           # matplotlib charts -> base64 PNG
-│   ├── render.py           # Jinja2 + Playwright -> PDF
-│   └── pipeline.py         # orchestration
+│   ├── ingest.py          
+│   ├── extract.py         
+│   ├── charts.py           
+│   ├── render.py           
+│   └── pipeline.py         
 ├── templates/
-│   └── report.html         # 4-page Geojit-style template
+│   └── report.html        
 └── examples/
 ├── LTTS_Q2FY26.pdf
 └── LTTS_Report.pdf
