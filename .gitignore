@@ -1,0 +1,22 @@
+# Virtual environment (this project's is named .summary)
+.summary/
+.venv/
+venv/
+env/
+
+# Secrets — NEVER commit your API key
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>
+  :root{
+    --teal:#137a63; --teal-d:#0e5c4a; --teal-l:#eaf3f0;
+    --ink:#1f2a27; --muted:#5b6b66; --line:#cfdcd7; --zebra:#f4f8f6;
+    --buy:#1a9e57; --sell:#d23b3b; --flat:#e8a33d;
+  }
+  *{ box-sizing:border-box; }
+  body{ font-family:"Segoe UI",Arial,sans-serif; color:var(--ink);
+        font-size:7.4pt; line-height:1.32; margin:0; }
+  .page{ page-break-after:always; padding:2pt; }
+  .page:last-child{ page-break-after:auto; }
+  h1,h2,h3{ margin:0; }
+  .right{ text-align:right; } .center{ text-align:center; }
+  .small{ font-size:6.6pt; color:var(--muted); }
+  p{ margin:0 0 5pt; text-align:justify; }
+
+  .mast{ display:flex; justify-content:space-between; align-items:flex-start;
+         border-bottom:2px solid var(--teal); padding-bottom:3pt; }
+  .desk{ color:var(--teal); font-weight:700; font-size:11pt; letter-spacing:.3px; }
+  .logo{ text-align:right; }
+  .logo .g{ color:var(--teal); font-weight:800; font-size:13pt; }
+  .logo .tag{ font-size:5.6pt; color:var(--muted); letter-spacing:1px; }
+  .coname{ font-size:20pt; font-weight:800; margin-top:4pt; }
+  .period-tab{ float:right; background:var(--teal); color:#fff; font-size:6.4pt;
+    padding:2pt 6pt; border-radius:2pt; margin-top:3pt; }
+
+  .rating-row{ display:flex; gap:6pt; margin-top:5pt; align-items:stretch; }
+  .ratingbox{ border:1.4px solid var(--ink); padding:4pt 12pt; text-align:center;
+    font-weight:800; font-size:14pt; min-width:74pt; }
+  .ratingbox.BUY,.ratingbox.ACCUMULATE{ color:var(--buy); border-color:var(--buy); }
+  .ratingbox.SELL,.ratingbox.REDUCE{ color:var(--sell); border-color:var(--sell); }
+  .headline-metrics{ flex:1; display:grid; grid-template-columns:repeat(3,1fr);
+    border:1px solid var(--line); }
+  .headline-metrics div{ padding:3pt 6pt; border-right:1px solid var(--line); }
+  .headline-metrics div:last-child{ border-right:0; }
+  .headline-metrics .k{ font-size:6.4pt; color:var(--muted); display:block; }
+  .headline-metrics .v{ font-size:11pt; font-weight:800; }
+
+  .keychanges{ display:flex; gap:14pt; margin-top:5pt; padding:3pt 6pt;
+    background:var(--teal-l); border:1px solid var(--line); }
+  .arr.up{ color:var(--buy);} .arr.down{ color:var(--sell);} .arr.flat{ color:var(--flat);}
+  .sector{ display:flex; justify-content:space-between; margin-top:4pt; font-weight:600; }
+
+  .metabar{ display:grid; grid-template-columns:repeat(6,1fr); border:1px solid var(--line);
+    margin-top:4pt; }
+  .metabar div{ padding:2.5pt 5pt; border-right:1px solid var(--line); font-size:6.6pt; }
+  .metabar div:last-child{ border-right:0; }
+  .metabar .k{ color:var(--muted); display:block; font-size:5.8pt; }
+
+  .cols{ display:flex; gap:8pt; margin-top:6pt; }
+  .col-l{ width:37%; } .col-r{ width:63%; }
+
+  table{ border-collapse:collapse; width:100%; margin-bottom:6pt; }
+  .ttl{ background:var(--teal); color:#fff; font-weight:700; font-size:7.2pt; padding:2.5pt 5pt; }
+  th,td{ padding:2pt 5pt; border-bottom:1px solid var(--line); font-size:6.9pt; }
+  thead th{ background:var(--teal); color:#fff; font-weight:700; border-bottom:0; }
+  td.lbl{ text-align:left; } td.val,th.val{ text-align:right; }
+  tr:nth-child(even) td{ background:var(--zebra); }
+  tr.total td{ font-weight:800; border-top:1.2px solid var(--teal); }
+  .kv td{ font-size:6.9pt; } .kv td:last-child{ text-align:right; font-weight:600; }
+
+  .thesis{ color:var(--teal); font-weight:800; font-size:9.4pt; margin:1pt 0 4pt; }
+  ul{ margin:0 0 6pt 0; padding-left:12pt; } li{ margin-bottom:2.5pt; }
+  .sec-h{ color:var(--teal); font-weight:800; font-size:9pt;
+    border-bottom:1.5px solid var(--teal); margin:7pt 0 4pt; padding-bottom:1pt; }
+
+  .chart-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8pt; }
+  .chart{ border:1px solid var(--line); padding:4pt; }
+  .chart .cap{ color:var(--teal); font-weight:700; font-size:7.6pt; margin-bottom:2pt; }
+  .chart img{ width:100%; }
+  .fin-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8pt 10pt; }
+  .disc{ font-size:5.9pt; color:var(--muted); text-align:justify; line-height:1.28; }
+  .legend span{ margin-right:14pt; }
+</style>
+</head>
+<body>
+
+{% macro grid_table(title, tbl, label_head="") %}
+  {% if tbl and tbl.rows %}
+  <table>
+    {% if title %}<tr><td class="ttl" colspan="{{ (tbl.columns|length) + 1 }}">{{ title }}</td></tr>{% endif %}
+    <thead><tr>
+      <th class="lbl">{{ label_head }}</th>
+      {% for c in tbl.columns %}<th class="val">{{ c }}</th>{% endfor %}
+    </tr></thead>
+    <tbody>
+      {% for row in tbl.rows %}
+      <tr class="{{ 'total' if (row['label'] or '')|lower in ['total','total liabilities','total assets','shareholder funds'] else '' }}">
+        <td class="lbl">{{ row['label']|g }}</td>
+        {% for v in row['values'] %}<td class="val">{{ v|g }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+{% endmacro %}
+
+{% macro kv_table(title, rows) %}
+  <table class="kv">
+    <tr><td class="ttl" colspan="2">{{ title }}</td></tr>
+    {% for r in rows %}<tr><td>{{ r['label']|g }}</td><td>{{ r['value']|g }}</td></tr>{% endfor %}
+  </table>
+{% endmacro %}
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="mast">
+    <div>
+      <div class="desk">{{ d.meta.research_desk|g }}</div>
+      <div class="coname">{{ d.meta.company_name|g }}</div>
+    </div>
+    <div class="logo">
+      <div class="g">◗ GEOJIT</div>
+      <div class="tag">PEOPLE YOU PROSPER WITH</div>
+      <div class="period-tab">{{ d.meta.period_label|g }}</div>
+    </div>
+  </div>
+
+  <div class="rating-row">
+    <div class="ratingbox {{ d.meta.rating|g }}">{{ d.meta.rating|g }}</div>
+    <div class="headline-metrics">
+      <div><span class="k">Target</span><span class="v">{{ settings.currency_default }} {{ d.meta.target_price|g }}</span></div>
+      <div><span class="k">CMP</span><span class="v">{{ settings.currency_default }} {{ d.meta.cmp|g }}</span></div>
+      <div><span class="k">Return</span><span class="v">{{ d.meta.return_pct|g }}</span></div>
+    </div>
+  </div>
+
+  {% if d.key_changes %}
+  <div class="keychanges">
+    <span><b>Target</b> <span class="arr {{ d.key_changes.target|arrow_class }}">{{ d.key_changes.target|arrow }}</span></span>
+    <span><b>Rating</b> <span class="arr {{ d.key_changes.rating|arrow_class }}">{{ d.key_changes.rating|arrow }}</span></span>
+    <span><b>Earnings</b> <span class="arr {{ d.key_changes.earnings|arrow_class }}">{{ d.key_changes.earnings|arrow }}</span></span>
+  </div>
+  {% endif %}
+
+  <div class="sector"><span>Sector: {{ d.meta.sector|g }}</span><span>{{ d.meta.report_date|g }}</span></div>
+
+  <div class="metabar">
+    <div><span class="k">Stock Type</span>{{ d.meta.stock_type|g }}</div>
+    <div><span class="k">Bloomberg</span>{{ d.meta.bloomberg_code|g }}</div>
+    <div><span class="k">Sensex</span>{{ d.meta.sensex|g }}</div>
+    <div><span class="k">NSE Code</span>{{ d.meta.nse_code|g }}</div>
+    <div><span class="k">BSE Code</span>{{ d.meta.bse_code|g }}</div>
+    <div><span class="k">Time Frame</span>{{ d.meta.time_frame|g }}</div>
+  </div>
+  <div class="small" style="margin-top:2pt">{{ d.meta.data_asof|g }}</div>
+
+  <div class="cols">
+    <div class="col-l">
+      {{ kv_table("Company Data", d.company_data or []) }}
+      {{ grid_table("Shareholding (%)", d.shareholding, "") }}
+      {{ grid_table("Price Performance", d.price_performance, "") }}
+    </div>
+    <div class="col-r">
+      <div class="thesis">{{ d.meta.report_title|g }}</div>
+      <p>{{ d.narrative.company_description|g }}</p>
+      <ul>{% for b in d.narrative.highlights or [] %}<li>{{ b }}</li>{% endfor %}</ul>
+      <div class="sec-h">Outlook &amp; Valuation</div>
+      <p>{{ d.narrative.outlook_valuation|g }}</p>
+      {{ grid_table("", d.estimates, "Y.E March ("+settings.units_default+")") }}
+    </div>
+  </div>
+
+  {{ grid_table("Quarterly Financials", d.quarterly, settings.currency_default+settings.units_default) }}
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="sec-h">Key highlights</div>
+  <ul>{% for b in d.narrative.key_highlights or [] %}<li>{{ b }}</li>{% endfor %}</ul>
+  <div class="chart-grid">
+    <div class="chart"><div class="cap">Revenue</div>{% if charts.revenue %}<img src="{{ charts.revenue }}"/>{% else %}<div class="small">{{ settings.missing_marker }}</div>{% endif %}</div>
+    <div class="chart"><div class="cap">Gross Order Value</div>{% if charts.gov %}<img src="{{ charts.gov }}"/>{% else %}<div class="small">{{ settings.missing_marker }}</div>{% endif %}</div>
+    <div class="chart"><div class="cap">EBITDA</div>{% if charts.ebitda %}<img src="{{ charts.ebitda }}"/>{% else %}<div class="small">{{ settings.missing_marker }}</div>{% endif %}</div>
+    <div class="chart"><div class="cap">PAT</div>{% if charts.pat %}<img src="{{ charts.pat }}"/>{% else %}<div class="small">{{ settings.missing_marker }}</div>{% endif %}</div>
+  </div>
+  <div style="margin-top:8pt">{{ grid_table("Change in Estimates", d.change_in_estimates, "") }}</div>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page">
+  <div class="sec-h">Consolidated Financials</div>
+  {% set f = d.financials or {} %}
+  {% set fl = f.period_label or "" %}
+  <div class="fin-grid">
+    <div>{{ grid_table("Profit & Loss", f.profit_loss, fl) }}</div>
+    <div>{{ grid_table("Balance Sheet", f.balance_sheet, fl) }}</div>
+    <div>{{ grid_table("Cash Flow", f.cashflow, fl) }}</div>
+    <div>{{ grid_table("Ratios", f.ratios, fl) }}</div>
+  </div>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page">
+  <div class="sec-h">Recommendation Summary</div>
+  <div class="cols">
+    <div class="col-r">{% if charts.rating_history %}<img src="{{ charts.rating_history }}" style="width:100%"/>{% else %}<div class="small">{{ settings.missing_marker }}</div>{% endif %}</div>
+    <div class="col-l">
+      <table><thead><tr><th class="lbl">Date</th><th class="val">Rating</th><th class="val">Target</th></tr></thead>
+      <tbody>{% for r in d.recommendation_history or [] %}
+        <tr><td class="lbl">{{ r.date|g }}</td><td class="val">{{ r.rating|g }}</td><td class="val">{{ r.target|g }}</td></tr>
+      {% endfor %}</tbody></table>
+    </div>
+  </div>
+  <div class="sec-h">Investment Rating Criteria</div>
+  <table>
+    <thead><tr><th class="lbl">Ratings</th><th class="val">Large caps</th><th class="val">Midcaps</th><th class="val">Small Caps</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Buy</td><td class="val">Upside &gt; 10%</td><td class="val">Upside &gt; 15%</td><td class="val">Upside &gt; 20%</td></tr>
+      <tr><td class="lbl">Accumulate</td><td class="val">-</td><td class="val">10%-15%</td><td class="val">10%-20%</td></tr>
+      <tr><td class="lbl">Hold</td><td class="val">0%-10%</td><td class="val">0%-10%</td><td class="val">0%-10%</td></tr>
+      <tr><td class="lbl">Reduce/Sell</td><td class="val">Downside &gt; 0%</td><td class="val">Downside &gt; 0%</td><td class="val">Downside &gt; 0%</td></tr>
+    </tbody>
+  </table>
+  <p class="legend small"><span>▲ Upgrade</span><span>■ No Change</span><span>▼ Downgrade</span></p>
+  <div class="sec-h">Disclaimer</div>
+  <p class="disc">This report is generated automatically from the supplied company document for
+  demonstration purposes and is modelled on the Geojit research format. It is not investment
+  advice. Figures are extracted by an automated system and may contain errors; always verify
+  against primary filings.</p>
+</div>
+
+</body>
+</html>
